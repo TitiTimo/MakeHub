@@ -5,7 +5,7 @@
 --
 -- UTILISATION:
 -- - Appuyez sur RightControl pour ouvrir/fermer le menu
-q
+
 -- - ESP: Voir les joueurs à travers les murs
 -- - Aimbot: Visée automatique (maintenir bouton droit)
 -- - Speed/Jump/Flight: Modifications de mouvement
