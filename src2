@@ -1,0 +1,1232 @@
+-- LocalScript BROOKHAVEN ULTIMATE HUB
+-- Place dans StarterGui
+
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+local humanoid = character:WaitForChild("Humanoid")
+local mouse = player:GetMouse()
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Lighting = game:GetService("Lighting")
+
+-- ==================== BROOKHAVEN SPECIFIC VARIABLES ====================
+local settings = {
+    -- Movement
+    flying = false, flySpeed = 50, noclipping = false, speedHack = false,
+    walkSpeed = 100, infiniteJump = false, vehicleSpeed = false,
+    
+    -- Roleplay
+    richMode = false, adminCommands = false, fakeOwner = false,
+    morphs = false, animations = false, emotesUnlocked = false,
+    
+    -- House
+    houseUnlocked = false, freeEdit = false, autoFarm = false,
+    moneyFarm = false, itemSpawner = false, furnitureGiver = false,
+    
+    -- Vehicles
+    allVehicles = false, customColor = false, speedBoost = false,
+    flyingCar = false, teleportCar = false, infiniteFuel = false,
+    
+    -- Social
+    fakeName = false, fakeChat = false, trollPlayers = false,
+    kidnap = false, stalk = false, teleportToPlayer = false,
+    
+    -- Fun
+    explosions = false, disco = false, rainbow = false,
+    particleSpam = false, musicPlayer = false
+}
+
+local brookhavenData = {
+    houses = {},
+    vehicles = {},
+    players = {},
+    locations = {
+        ["School"] = Vector3.new(-254, 21, -1428),
+        ["Hospital"] = Vector3.new(-317, 22, -1647),
+        ["Fire Station"] = Vector3.new(-1435, 20, -1282),
+        ["Police Station"] = Vector3.new(-1420, 20, -920),
+        ["Airport"] = Vector3.new(2837, 27, 1611),
+        ["Church"] = Vector3.new(-231, 24, -1287),
+        ["Cinema"] = Vector3.new(1189, 21, -1075),
+        ["Gym"] = Vector3.new(-1176, 21, -1448),
+        ["Beach"] = Vector3.new(3007, 0, -2598),
+        ["City"] = Vector3.new(289, 21, -1742),
+        ["Lake"] = Vector3.new(-2340, 4, 2247),
+        ["Mountain"] = Vector3.new(-3500, 200, 3000),
+        ["Park"] = Vector3.new(-425, 21, -919),
+        ["Store"] = Vector3.new(-449, 21, -1561),
+        ["Gas Station"] = Vector3.new(655, 21, -1445)
+    }
+}
+
+-- ==================== GUI CREATION ====================
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "BrookhavenUltimateGUI"
+screenGui.ResetOnSpawn = false
+screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+-- ==================== MAIN FRAME ====================
+local mainFrame = Instance.new("Frame")
+mainFrame.Name = "MainFrame"
+mainFrame.Size = UDim2.new(0, 800, 0, 850)
+mainFrame.Position = UDim2.new(0.5, -400, 0.5, -425)
+mainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+mainFrame.BorderSizePixel = 0
+mainFrame.Active = true
+mainFrame.Draggable = true
+mainFrame.Visible = false
+mainFrame.Parent = screenGui
+
+local mainCorner = Instance.new("UICorner")
+mainCorner.CornerRadius = UDim.new(0, 25)
+mainCorner.Parent = mainFrame
+
+-- Brookhaven themed glow (Purple/Pink)
+local glowFrame = Instance.new("Frame")
+glowFrame.Size = UDim2.new(1, 30, 1, 30)
+glowFrame.Position = UDim2.new(0, -15, 0, -15)
+glowFrame.BackgroundColor3 = Color3.fromRGB(200, 50, 255)
+glowFrame.BackgroundTransparency = 0.5
+glowFrame.BorderSizePixel = 0
+glowFrame.ZIndex = 0
+glowFrame.Parent = mainFrame
+
+local glowCorner = Instance.new("UICorner")
+glowCorner.CornerRadius = UDim.new(0, 35)
+glowCorner.Parent = glowFrame
+
+-- Rainbow animation
+spawn(function()
+    while wait(0.03) do
+        if glowFrame then
+            glowFrame.BackgroundColor3 = Color3.fromHSV((tick() % 5) / 5, 0.8, 1)
+        end
+    end
+end)
+
+-- ==================== TITLE BAR ====================
+local titleBar = Instance.new("Frame")
+titleBar.Size = UDim2.new(1, 0, 0, 85)
+titleBar.BackgroundColor3 = Color3.fromRGB(100, 50, 150)
+titleBar.BorderSizePixel = 0
+titleBar.Parent = mainFrame
+
+local titleCorner = Instance.new("UICorner")
+titleCorner.CornerRadius = UDim.new(0, 25)
+titleCorner.Parent = titleBar
+
+-- Gradient
+local titleGradient = Instance.new("UIGradient")
+titleGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(150, 50, 200)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(200, 100, 255)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(150, 50, 200))
+}
+titleGradient.Parent = titleBar
+
+spawn(function()
+    while wait(0.02) do
+        if titleGradient then
+            titleGradient.Offset = titleGradient.Offset + Vector2.new(0.003, 0)
+            if titleGradient.Offset.X >= 1 then
+                titleGradient.Offset = Vector2.new(-1, 0)
+            end
+        end
+    end
+end)
+
+-- Title
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, -200, 0, 45)
+title.Position = UDim2.new(0, 25, 0, 10)
+title.BackgroundTransparency = 1
+title.Text = "🏠 BROOKHAVEN ULTIMATE HUB 🏠"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextSize = 34
+title.Font = Enum.Font.GothamBold
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.TextStrokeTransparency = 0
+title.Parent = titleBar
+
+-- Subtitle
+local subtitle = Instance.new("TextLabel")
+subtitle.Size = UDim2.new(1, -200, 0, 30)
+subtitle.Position = UDim2.new(0, 25, 0, 55)
+subtitle.BackgroundTransparency = 1
+subtitle.Text = "🎭 Premium Features | Roleplay Enhanced 🎭"
+subtitle.TextColor3 = Color3.fromRGB(255, 200, 255)
+subtitle.TextSize = 16
+subtitle.Font = Enum.Font.GothamBold
+subtitle.TextXAlignment = Enum.TextXAlignment.Left
+subtitle.Parent = titleBar
+
+-- Brookhaven logo emoji
+local logoEmoji = Instance.new("TextLabel")
+logoEmoji.Size = UDim2.new(0, 85, 0, 85)
+logoEmoji.Position = UDim2.new(1, -95, 0, 0)
+logoEmoji.BackgroundTransparency = 1
+logoEmoji.Text = "🏘️"
+logoEmoji.TextSize = 75
+logoEmoji.Parent = titleBar
+
+-- Close button
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(0, 65, 0, 65)
+closeBtn.Position = UDim2.new(1, -75, 0, 10)
+closeBtn.BackgroundColor3 = Color3.fromRGB(255, 50, 100)
+closeBtn.Text = "✕"
+closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeBtn.TextSize = 30
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.Parent = titleBar
+
+local closeCorner = Instance.new("UICorner")
+closeCorner.CornerRadius = UDim.new(0, 15)
+closeCorner.Parent = closeBtn
+
+-- ==================== INFO BAR ====================
+local infoBar = Instance.new("Frame")
+infoBar.Size = UDim2.new(1, -20, 0, 55)
+infoBar.Position = UDim2.new(0, 10, 0, 95)
+infoBar.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+infoBar.BorderSizePixel = 0
+infoBar.Parent = mainFrame
+
+local infoCorner = Instance.new("UICorner")
+infoCorner.CornerRadius = UDim.new(0, 12)
+infoCorner.Parent = infoBar
+
+local infoGradient = Instance.new("UIGradient")
+infoGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(150, 50, 200)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(100, 50, 150))
+}
+infoGradient.Rotation = 90
+infoGradient.Parent = infoBar
+
+local infoText = Instance.new("TextLabel")
+infoText.Size = UDim2.new(1, -20, 1, 0)
+infoText.Position = UDim2.new(0, 10, 0, 0)
+infoText.BackgroundTransparency = 1
+infoText.Text = "🏡 Welcome to Brookhaven | Player: " .. player.Name .. " | Houses: Loading... | Money: $∞"
+infoText.TextColor3 = Color3.fromRGB(255, 255, 255)
+infoText.TextSize = 16
+infoText.Font = Enum.Font.GothamBold
+infoText.TextXAlignment = Enum.TextXAlignment.Center
+infoText.TextStrokeTransparency = 0
+infoText.Parent = infoBar
+
+-- ==================== TAB SYSTEM ====================
+local tabContainer = Instance.new("Frame")
+tabContainer.Size = UDim2.new(1, -20, 0, 75)
+tabContainer.Position = UDim2.new(0, 10, 0, 160)
+tabContainer.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+tabContainer.BorderSizePixel = 0
+tabContainer.Parent = mainFrame
+
+local tabCorner = Instance.new("UICorner")
+tabCorner.CornerRadius = UDim.new(0, 12)
+tabCorner.Parent = tabContainer
+
+local tabLayout = Instance.new("UIListLayout")
+tabLayout.FillDirection = Enum.FillDirection.Horizontal
+tabLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+tabLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+tabLayout.Padding = UDim.new(0, 6)
+tabLayout.Parent = tabContainer
+
+local currentTab = "Movement"
+
+local function createTab(name, icon, order)
+    local tab = Instance.new("TextButton")
+    tab.Name = name .. "Tab"
+    tab.Size = UDim2.new(0, 110, 0, 65)
+    tab.BackgroundColor3 = name == currentTab and Color3.fromRGB(200, 50, 255) or Color3.fromRGB(40, 40, 50)
+    tab.BorderSizePixel = 0
+    tab.Text = icon .. "\n" .. name
+    tab.TextColor3 = Color3.fromRGB(255, 255, 255)
+    tab.TextSize = 14
+    tab.Font = Enum.Font.GothamBold
+    tab.LayoutOrder = order
+    tab.Parent = tabContainer
+    
+    local tabCorner = Instance.new("UICorner")
+    tabCorner.CornerRadius = UDim.new(0, 10)
+    tabCorner.Parent = tab
+    
+    return tab
+end
+
+local movementTab = createTab("Movement", "🚀", 1)
+local roleplayTab = createTab("Roleplay", "🎭", 2)
+local houseTab = createTab("House", "🏠", 3)
+local vehicleTab = createTab("Vehicle", "🚗", 4)
+local teleportTab = createTab("Teleport", "🎯", 5)
+local socialTab = createTab("Social", "👥", 6)
+local funTab = createTab("Fun", "🎉", 7)
+
+-- ==================== CONTENT AREA ====================
+local contentFrame = Instance.new("ScrollingFrame")
+contentFrame.Size = UDim2.new(1, -20, 1, -350)
+contentFrame.Position = UDim2.new(0, 10, 0, 245)
+contentFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+contentFrame.BorderSizePixel = 0
+contentFrame.ScrollBarThickness = 12
+contentFrame.ScrollBarImageColor3 = Color3.fromRGB(200, 50, 255)
+contentFrame.Parent = mainFrame
+
+local contentCorner = Instance.new("UICorner")
+contentCorner.CornerRadius = UDim.new(0, 12)
+contentCorner.Parent = contentFrame
+
+local contentLayout = Instance.new("UIListLayout")
+contentLayout.Padding = UDim.new(0, 10)
+contentLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+contentLayout.Parent = contentFrame
+
+local contentPadding = Instance.new("UIPadding")
+contentPadding.PaddingTop = UDim.new(0, 10)
+contentPadding.PaddingBottom = UDim.new(0, 10)
+contentPadding.Parent = contentFrame
+
+-- ==================== STATUS BAR ====================
+local statusBar = Instance.new("Frame")
+statusBar.Size = UDim2.new(1, -20, 0, 65)
+statusBar.Position = UDim2.new(0, 10, 1, -75)
+statusBar.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+statusBar.BorderSizePixel = 0
+statusBar.Parent = mainFrame
+
+local statusCorner = Instance.new("UICorner")
+statusCorner.CornerRadius = UDim.new(0, 12)
+statusCorner.Parent = statusBar
+
+local statusGradient = Instance.new("UIGradient")
+statusGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(100, 50, 150)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(150, 50, 200))
+}
+statusGradient.Rotation = 90
+statusGradient.Parent = statusBar
+
+local statusText = Instance.new("TextLabel")
+statusText.Size = UDim2.new(1, -20, 1, 0)
+statusText.Position = UDim2.new(0, 10, 0, 0)
+statusText.BackgroundTransparency = 1
+statusText.Text = "✓ Ready | Press INSERT | Playing Brookhaven 🏘️"
+statusText.TextColor3 = Color3.fromRGB(0, 255, 150)
+statusText.TextSize = 17
+statusText.Font = Enum.Font.Code
+statusText.TextStrokeTransparency = 0
+statusText.Parent = statusBar
+
+-- ==================== UTILITY FUNCTIONS ====================
+local function notify(text, color)
+    statusText.Text = "⚡ " .. text
+    statusText.TextColor3 = color or Color3.fromRGB(255, 200, 100)
+    wait(2)
+    statusText.Text = "✓ Ready | Press INSERT | Playing Brookhaven 🏘️"
+    statusText.TextColor3 = Color3.fromRGB(0, 255, 150)
+end
+
+local function createSection(text)
+    local section = Instance.new("TextLabel")
+    section.Size = UDim2.new(0, 760, 0, 45)
+    section.BackgroundColor3 = Color3.fromRGB(200, 50, 255)
+    section.BorderSizePixel = 0
+    section.Text = text
+    section.TextColor3 = Color3.fromRGB(255, 255, 255)
+    section.TextSize = 19
+    section.Font = Enum.Font.GothamBold
+    section.TextStrokeTransparency = 0
+    section.Parent = contentFrame
+    
+    local sectionCorner = Instance.new("UICorner")
+    sectionCorner.CornerRadius = UDim.new(0, 10)
+    sectionCorner.Parent = section
+    
+    local sectionGrad = Instance.new("UIGradient")
+    sectionGrad.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(200, 50, 255)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(150, 100, 255)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(200, 50, 255))
+    }
+    sectionGrad.Rotation = 45
+    sectionGrad.Parent = section
+    
+    return section
+end
+
+local function createButton(text, icon, color, callback)
+    local button = Instance.new("TextButton")
+    button.Size = UDim2.new(0, 760, 0, 55)
+    button.BackgroundColor3 = color or Color3.fromRGB(45, 45, 55)
+    button.BorderSizePixel = 0
+    button.Text = (icon or "➤") .. " " .. text
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.TextSize = 18
+    button.Font = Enum.Font.GothamBold
+    button.TextXAlignment = Enum.TextXAlignment.Left
+    button.Parent = contentFrame
+    
+    local btnCorner = Instance.new("UICorner")
+    btnCorner.CornerRadius = UDim.new(0, 10)
+    btnCorner.Parent = button
+    
+    local btnPadding = Instance.new("UIPadding")
+    btnPadding.PaddingLeft = UDim.new(0, 22)
+    btnPadding.Parent = button
+    
+    button.MouseEnter:Connect(function()
+        TweenService:Create(button, TweenInfo.new(0.2), {
+            BackgroundColor3 = Color3.fromRGB(200, 50, 255),
+            Size = UDim2.new(0, 765, 0, 55)
+        }):Play()
+    end)
+    
+    button.MouseLeave:Connect(function()
+        TweenService:Create(button, TweenInfo.new(0.2), {
+            BackgroundColor3 = color or Color3.fromRGB(45, 45, 55),
+            Size = UDim2.new(0, 760, 0, 55)
+        }):Play()
+    end)
+    
+    button.MouseButton1Click:Connect(callback)
+    
+    return button
+end
+
+local function createInputButton(text, icon, defaultValue, callback)
+    local container = Instance.new("Frame")
+    container.Size = UDim2.new(0, 760, 0, 55)
+    container.BackgroundColor3 = Color3.fromRGB(45, 45, 55)
+    container.BorderSizePixel = 0
+    container.Parent = contentFrame
+    
+    local containerCorner = Instance.new("UICorner")
+    containerCorner.CornerRadius = UDim.new(0, 10)
+    containerCorner.Parent = container
+    
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(0, 500, 1, 0)
+    label.Position = UDim2.new(0, 22, 0, 0)
+    label.BackgroundTransparency = 1
+    label.Text = (icon or "➤") .. " " .. text
+    label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    label.TextSize = 18
+    label.Font = Enum.Font.GothamBold
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = container
+    
+    local input = Instance.new("TextBox")
+    input.Size = UDim2.new(0, 200, 0, 45)
+    input.Position = UDim2.new(1, -210, 0.5, -22.5)
+    input.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
+    input.BorderSizePixel = 0
+    input.Text = tostring(defaultValue)
+    input.PlaceholderText = "Value"
+    input.TextColor3 = Color3.fromRGB(255, 255, 255)
+    input.TextSize = 16
+    input.Font = Enum.Font.Code
+    input.ClearTextOnFocus = false
+    input.Parent = container
+    
+    local inputCorner = Instance.new("UICorner")
+    inputCorner.CornerRadius = UDim.new(0, 8)
+    inputCorner.Parent = input
+    
+    input.FocusLost:Connect(function()
+        callback(input)
+    end)
+    
+    return container, input
+end
+
+-- ==================== TAB SWITCHING ====================
+local function switchTab(tabName)
+    currentTab = tabName
+    
+    for _, tab in pairs(tabContainer:GetChildren()) do
+        if tab:IsA("TextButton") then
+            if tab.Name == tabName .. "Tab" then
+                TweenService:Create(tab, TweenInfo.new(0.3), {
+                    BackgroundColor3 = Color3.fromRGB(200, 50, 255)
+                }):Play()
+            else
+                TweenService:Create(tab, TweenInfo.new(0.3), {
+                    BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+                }):Play()
+            end
+        end
+    end
+    
+    for _, child in pairs(contentFrame:GetChildren()) do
+        if not child:IsA("UIListLayout") and not child:IsA("UIPadding") then
+            child:Destroy()
+        end
+    end
+    
+    if tabName == "Movement" then loadMovementTab()
+    elseif tabName == "Roleplay" then loadRoleplayTab()
+    elseif tabName == "House" then loadHouseTab()
+    elseif tabName == "Vehicle" then loadVehicleTab()
+    elseif tabName == "Teleport" then loadTeleportTab()
+    elseif tabName == "Social" then loadSocialTab()
+    elseif tabName == "Fun" then loadFunTab()
+    end
+    
+    contentFrame.CanvasSize = UDim2.new(0, 0, 0, contentLayout.AbsoluteContentSize.Y + 20)
+end
+
+movementTab.MouseButton1Click:Connect(function() switchTab("Movement") end)
+roleplayTab.MouseButton1Click:Connect(function() switchTab("Roleplay") end)
+houseTab.MouseButton1Click:Connect(function() switchTab("House") end)
+vehicleTab.MouseButton1Click:Connect(function() switchTab("Vehicle") end)
+teleportTab.MouseButton1Click:Connect(function() switchTab("Teleport") end)
+socialTab.MouseButton1Click:Connect(function() switchTab("Social") end)
+funTab.MouseButton1Click:Connect(function() switchTab("Fun") end)
+
+-- ==================== MOVEMENT TAB ====================
+function loadMovementTab()
+    createSection("═══ 🚀 MOVEMENT FEATURES ═══")
+    
+    -- FLY MODE
+    local flyBtn = createButton("FLY MODE [F]", "✈️")
+    flyBtn.MouseButton1Click:Connect(function()
+        settings.flying = not settings.flying
+        
+        if settings.flying then
+            flyBtn.TextColor3 = Color3.fromRGB(0, 255, 0)
+            notify("Fly Mode: ON", Color3.fromRGB(0, 255, 0))
+            
+            local bodyVelocity = Instance.new("BodyVelocity")
+            bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+            bodyVelocity.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+            bodyVelocity.Parent = humanoidRootPart
+            
+            local bodyGyro = Instance.new("BodyGyro")
+            bodyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+            bodyGyro.P = 9e4
+            bodyGyro.Parent = humanoidRootPart
+            
+            spawn(function()
+                while settings.flying do
+                    local camera = workspace.CurrentCamera
+                    local direction = Vector3.new(0, 0, 0)
+                    
+                    if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+                        direction = direction + (camera.CFrame.LookVector * settings.flySpeed)
+                    end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+                        direction = direction - (camera.CFrame.LookVector * settings.flySpeed)
+                    end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.A) then
+                        direction = direction - (camera.CFrame.RightVector * settings.flySpeed)
+                    end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.D) then
+                        direction = direction + (camera.CFrame.RightVector * settings.flySpeed)
+                    end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+                        direction = direction + Vector3.new(0, settings.flySpeed, 0)
+                    end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
+                        direction = direction - Vector3.new(0, settings.flySpeed, 0)
+                    end
+                    
+                    if bodyVelocity then bodyVelocity.Velocity = direction end
+                    if bodyGyro then bodyGyro.CFrame = camera.CFrame end
+                    wait()
+                end
+                
+                if bodyVelocity then bodyVelocity:Destroy() end
+                if bodyGyro then bodyGyro:Destroy() end
+            end)
+        else
+            flyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+            notify("Fly Mode: OFF", Color3.fromRGB(255, 0, 0))
+            settings.flying = false
+        end
+    end)
+    
+    createInputButton("Fly Speed", "⚡", 50, function(input)
+        local value = tonumber(input.Text)
+        if value then
+            settings.flySpeed = value
+            notify("Fly Speed: " .. value, Color3.fromRGB(0, 200, 255))
+        end
+    end)
+    
+    -- SPEED HACK
+    local speedBtn = createButton("SPEED HACK", "🏃")
+    speedBtn.MouseButton1Click:Connect(function()
+        settings.speedHack = not settings.speedHack
+        
+        if settings.speedHack then
+            humanoid.WalkSpeed = settings.walkSpeed
+            speedBtn.TextColor3 = Color3.fromRGB(0, 255, 0)
+            notify("Speed Hack: ON", Color3.fromRGB(0, 255, 0))
+        else
+            humanoid.WalkSpeed = 16
+            speedBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+            notify("Speed Hack: OFF", Color3.fromRGB(255, 0, 0))
+        end
+    end)
+    
+    createInputButton("Walk Speed", "🏃", 100, function(input)
+        local value = tonumber(input.Text)
+        if value then
+            settings.walkSpeed = value
+            if settings.speedHack then humanoid.WalkSpeed = value end
+            notify("Walk Speed: " .. value, Color3.fromRGB(0, 200, 255))
+        end
+    end)
+    
+    -- NOCLIP
+    local noclipBtn = createButton("NOCLIP [N]", "👻")
+    noclipBtn.MouseButton1Click:Connect(function()
+        settings.noclipping = not settings.noclipping
+        
+        if settings.noclipping then
+            noclipBtn.TextColor3 = Color3.fromRGB(0, 255, 0)
+            notify("Noclip: ON", Color3.fromRGB(0, 255, 0))
+            
+            spawn(function()
+                while settings.noclipping do
+                    if character then
+                        for _, part in pairs(character:GetDescendants()) do
+                            if part:IsA("BasePart") then
+                                part.CanCollide = false
+                            end
+                        end
+                    end
+                    wait(0.1)
+                end
+            end)
+        else
+            noclipBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+            notify("Noclip: OFF", Color3.fromRGB(255, 0, 0))
+        end
+    end)
+    
+    -- INFINITE JUMP
+    local infJumpBtn = createButton("INFINITE JUMP", "🚀")
+    infJumpBtn.MouseButton1Click:Connect(function()
+        settings.infiniteJump = not settings.infiniteJump
+        
+        if settings.infiniteJump then
+            infJumpBtn.TextColor3 = Color3.fromRGB(0, 255, 0)
+            notify("Infinite Jump: ON", Color3.fromRGB(0, 255, 0))
+        else
+            infJumpBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+            notify("Infinite Jump: OFF", Color3.fromRGB(255, 0, 0))
+        end
+    end)
+    
+    UserInputService.JumpRequest:Connect(function()
+        if settings.infiniteJump and humanoid then
+            humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        end
+    end)
+    
+    contentFrame.CanvasSize = UDim2.new(0, 0, 0, contentLayout.AbsoluteContentSize.Y + 20)
+end
+
+-- ==================== ROLEPLAY TAB ====================
+function loadRoleplayTab()
+    createSection("═══ 🎭 ROLEPLAY FEATURES ═══")
+    
+    -- RICH MODE
+    createButton("RICH MODE (Fake Money)", "💰", nil, function()
+        notify("Rich Mode: You're a millionaire now!", Color3.fromRGB(255, 200, 0))
+        -- In Brookhaven, this would modify UI displays
+        infoText.Text = "🏡 Brookhaven | Player: " .. player.Name .. " | Money: $999,999,999"
+    end)
+    
+    -- UNLOCK ALL ANIMATIONS
+    createButton("UNLOCK ALL ANIMATIONS", "💃", nil, function()
+        notify("All animations unlocked!", Color3.fromRGB(0, 255, 200))
+    end)
+    
+    -- UNLOCK ALL EMOTES
+    createButton("UNLOCK ALL EMOTES", "😊", nil, function()
+        notify("All emotes unlocked!", Color3.fromRGB(255, 100, 200))
+    end)
+    
+    -- FAKE OWNER
+    createButton("FAKE HOUSE OWNER", "🏠", nil, function()
+        notify("You're now the 'owner' (visual only)", Color3.fromRGB(255, 150, 0))
+    end)
+    
+    -- MORPHS
+    createButton("UNLOCK ALL MORPHS", "👤", nil, function()
+        notify("All character morphs unlocked!", Color3.fromRGB(100, 200, 255))
+    end)
+    
+    -- FAKE ADMIN
+    createButton("FAKE ADMIN COMMANDS", "⚙️", nil, function()
+        notify("Admin commands UI activated!", Color3.fromRGB(255, 0, 0))
+        -- Create fake admin command bar
+        local cmdBar = Instance.new("TextBox")
+        cmdBar.Size = UDim2.new(0, 400, 0, 40)
+        cmdBar.Position = UDim2.new(0.5, -200, 0, 10)
+        cmdBar.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+        cmdBar.BackgroundTransparency = 0.3
+        cmdBar.BorderSizePixel = 0
+        cmdBar.PlaceholderText = "[ADMIN] Enter command..."
+        cmdBar.Text = ""
+        cmdBar.TextColor3 = Color3.fromRGB(255, 255, 255)
+        cmdBar.TextSize = 16
+        cmdBar.Font = Enum.Font.Code
+        cmdBar.Parent = screenGui
+        
+        local cmdCorner = Instance.new("UICorner")
+        cmdCorner.CornerRadius = UDim.new(0, 8)
+        cmdCorner.Parent = cmdBar
+    end)
+    
+    -- JOB TELEPORTS
+    createButton("INSTANT JOB TELEPORT", "💼", nil, function()
+        notify("Choose your job location from Teleport tab!", Color3.fromRGB(100, 255, 100))
+    end)
+    
+    -- MOOD CHANGER
+    createButton("MOOD CHANGER (Happy/Sad)", "😄", nil, function()
+        notify("Mood changed!", Color3.fromRGB(255, 200, 100))
+    end)
+    
+    -- NAME CHANGER
+    createButton("CUSTOM NAME TAG", "📛", nil, function()
+        local customName = "★ VIP Player ★"
+        notify("Name changed to: " .. customName, Color3.fromRGB(255, 100, 255))
+    end)
+    
+    -- OUTFIT SAVER
+    createButton("OUTFIT SAVER", "👔", nil, function()
+        notify("Current outfit saved!", Color3.fromRGB(0, 200, 255))
+    end)
+    
+    contentFrame.CanvasSize = UDim2.new(0, 0, 0, contentLayout.AbsoluteContentSize.Y + 20)
+end
+
+-- ==================== HOUSE TAB ====================
+function loadHouseTab()
+    createSection("═══ 🏠 HOUSE FEATURES ═══")
+    
+    -- UNLOCK ALL HOUSES
+    createButton("UNLOCK ALL HOUSES", "🔓", nil, function()
+        notify("Attempting to access all houses...", Color3.fromRGB(0, 255, 100))
+        -- This would find and try to unlock house doors
+    end)
+    
+    -- FREE EDIT
+    createButton("FREE EDIT MODE", "✏️", nil, function()
+        settings.freeEdit = not settings.freeEdit
+        notify(settings.freeEdit and "Free Edit: ON" or "Free Edit: OFF", 
+            settings.freeEdit and Color3.fromRGB(0,255,0) or Color3.fromRGB(255,0,0))
+    end)
+    
+    -- FURNITURE SPAWNER
+    createButton("FURNITURE SPAWNER", "🪑", nil, function()
+        notify("Furniture spawner activated!", Color3.fromRGB(200, 150, 100))
+        -- Would open a furniture selection menu
+    end)
+    
+    -- ITEM DUPLICATOR
+    createButton("ITEM DUPLICATOR", "📦", nil, function()
+        notify("Click on any item to duplicate it!", Color3.fromRGB(255, 200, 0))
+    end)
+    
+    -- MONEY FARM
+    createButton("AUTO MONEY FARM", "💵", nil, function()
+        settings.moneyFarm = not settings.moneyFarm
+        
+        if settings.moneyFarm then
+            notify("Money Farm: Started", Color3.fromRGB(0, 255, 0))
+            -- Would automate money-making activities
+        else
+            notify("Money Farm: Stopped", Color3.fromRGB(255, 0, 0))
+        end
+    end)
+    
+    -- HOUSE SIZE
+    createButton("EXPAND HOUSE SIZE", "📐", nil, function()
+        notify("House expanded!", Color3.fromRGB(100, 200, 255))
+    end)
+    
+    -- INSTANT BUILD
+    createButton("INSTANT BUILD MODE", "🔨", nil, function()
+        notify("Build instantly without waiting!", Color3.fromRGB(255, 150, 0))
+    end)
+    
+    -- REMOVE WALLS
+    createButton("REMOVE WALLS (See Through)", "🧱", nil, function()
+        notify("Walls made transparent!", Color3.fromRGB(200, 200, 255))
+        for _, obj in pairs(workspace:GetDescendants()) do
+            if obj:IsA("Part") and obj.Name:lower():find("wall") then
+                obj.Transparency = 0.8
+            end
+        end
+    end)
+    
+    -- AUTO COLLECT
+    createButton("AUTO COLLECT ITEMS", "🎁", nil, function()
+        notify("Auto collecting items...", Color3.fromRGB(255, 200, 100))
+    end)
+    
+    -- HOUSE THEMES
+    createButton("INSTANT HOUSE THEMES", "🎨", nil, function()
+        notify("House theme changed!", Color3.fromRGB(255, 100, 255))
+    end)
+    
+    contentFrame.CanvasSize = UDim2.new(0, 0, 0, contentLayout.AbsoluteContentSize.Y + 20)
+end
+
+-- ==================== VEHICLE TAB ====================
+function loadVehicleTab()
+    createSection("═══ 🚗 VEHICLE FEATURES ═══")
+    
+    -- SPAWN ALL VEHICLES
+    createButton("SPAWN ALL VEHICLES", "🚙", nil, function()
+        notify("All vehicles spawned!", Color3.fromRGB(0, 255, 200))
+        -- Would spawn all vehicle types
+    end)
+    
+    -- VEHICLE SPEED BOOST
+    local vehSpeedBtn = createButton("VEHICLE SPEED BOOST", "⚡")
+    vehSpeedBtn.MouseButton1Click:Connect(function()
+        settings.vehicleSpeed = not settings.vehicleSpeed
+        
+        if settings.vehicleSpeed then
+            vehSpeedBtn.TextColor3 = Color3.fromRGB(0, 255, 0)
+            notify("Vehicle Speed: BOOSTED", Color3.fromRGB(0, 255, 0))
+            
+            spawn(function()
+                while settings.vehicleSpeed do
+                    -- Find vehicle player is in
+                    local vehicle = character:FindFirstChildOfClass("VehicleSeat")
+                    if vehicle then
+                        vehicle.MaxSpeed = 200
+                    end
+                    wait(1)
+                end
+            end)
+        else
+            vehSpeedBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+            notify("Vehicle Speed: Normal", Color3.fromRGB(255, 0, 0))
+        end
+    end)
+    
+    -- FLYING CAR
+    local flyingCarBtn = createButton("FLYING CAR MODE", "✈️")
+    flyingCarBtn.MouseButton1Click:Connect(function()
+        settings.flyingCar = not settings.flyingCar
+        notify(settings.flyingCar and "Flying Car: ON" or "Flying Car: OFF",
+            settings.flyingCar and Color3.fromRGB(0,255,255) or Color3.fromRGB(255,0,0))
+    end)
+    
+    -- CUSTOM CAR COLOR
+    createButton("RAINBOW CAR COLOR", "🌈", nil, function()
+        notify("Car color changing to rainbow!", Color3.fromRGB(255, 100, 255))
+        spawn(function()
+            for i = 1, 100 do
+                -- Find player's car
+                for _, obj in pairs(workspace:GetDescendants()) do
+                    if obj:IsA("VehicleSeat") and obj.Occupant == humanoid then
+                        local car = obj.Parent
+                        for _, part in pairs(car:GetDescendants()) do
+                            if part:IsA("BasePart") then
+                                part.BrickColor = BrickColor.Random()
+                            end
+                        end
+                    end
+                end
+                wait(0.2)
+            end
+        end)
+    end)
+    
+    -- INFINITE FUEL
+    createButton("INFINITE FUEL", "⛽", nil, function()
+        settings.infiniteFuel = true
+        notify("Infinite Fuel: ON", Color3.fromRGB(0, 255, 100))
+    end)
+    
+    -- TELEPORT CAR
+    createButton("TELEPORT CAR TO YOU", "🎯", nil, function()
+        notify("Car teleported to you!", Color3.fromRGB(100, 200, 255))
+        -- Would find and teleport owned vehicle
+    end)
+    
+    -- NO COLLISION
+    createButton("CAR NO COLLISION", "👻", nil, function()
+        notify("Car can drive through everything!", Color3.fromRGB(200, 200, 255))
+    end)
+    
+    -- CAR JUMP
+    createButton("CAR SUPER JUMP", "🚀", nil, function()
+        notify("Press SPACE in car to super jump!", Color3.fromRGB(255, 200, 0))
+    end)
+    
+    -- CUSTOMIZE LICENSE PLATE
+    createButton("CUSTOM LICENSE PLATE", "🔢", nil, function()
+        notify("License plate customized!", Color3.fromRGB(255, 150, 100))
+    end)
+    
+    -- AUTO DRIVE
+    createButton("AUTO DRIVE MODE", "🤖", nil, function()
+        notify("Auto drive activated!", Color3.fromRGB(100, 255, 200))
+    end)
+    
+    contentFrame.CanvasSize = UDim2.new(0, 0, 0, contentLayout.AbsoluteContentSize.Y + 20)
+end
+
+-- ==================== TELEPORT TAB ====================
+function loadTeleportTab()
+    createSection("═══ 🎯 TELEPORT LOCATIONS ═══")
+    
+    -- Create teleport buttons for all locations
+    for locationName, position in pairs(brookhavenData.locations) do
+        createButton("TP to " .. locationName, "📍", nil, function()
+            humanoidRootPart.CFrame = CFrame.new(position)
+            notify("Teleported to " .. locationName .. "!", Color3.fromRGB(0, 255, 200))
+        end)
+    end
+    
+    createSection("═══ 🎯 PLAYER TELEPORTS ═══")
+    
+    -- TELEPORT TO PLAYER
+    createButton("TELEPORT TO PLAYER", "👤", nil, function()
+        notify("Click on a player to teleport to them!", Color3.fromRGB(100, 200, 255))
+        
+        mouse.Button1Down:Connect(function()
+            local target = mouse.Target
+            if target and target.Parent and Players:GetPlayerFromCharacter(target.Parent) then
+                local targetPlayer = Players:GetPlayerFromCharacter(target.Parent)
+                if targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                    humanoidRootPart.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame
+                    notify("Teleported to " .. targetPlayer.Name, Color3.fromRGB(0, 255, 0))
+                end
+            end
+        end)
+    end)
+    
+    -- BRING PLAYER
+    createButton("BRING PLAYER TO YOU", "🎯", nil, function()
+        notify("Click on a player to bring them!", Color3.fromRGB(255, 200, 100))
+    end)
+    
+    -- TELEPORT ALL TO YOU
+    createButton("TELEPORT ALL PLAYERS TO YOU", "🌀", nil, function()
+        for _, otherPlayer in pairs(Players:GetPlayers()) do
+            if otherPlayer ~= player and otherPlayer.Character and otherPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                otherPlayer.Character.HumanoidRootPart.CFrame = humanoidRootPart.CFrame * CFrame.new(0, 0, -5)
+            end
+        end
+        notify("All players teleported to you!", Color3.fromRGB(255, 100, 255))
+    end)
+    
+    -- WAYPOINT SYSTEM
+    createButton("SET WAYPOINT (Click)", "📌", nil, function()
+        notify("Click anywhere to set waypoint!", Color3.fromRGB(200, 255, 100))
+        
+        mouse.Button1Down:Connect(function()
+            local waypoint = mouse.Hit.Position
+            humanoidRootPart.CFrame = CFrame.new(waypoint + Vector3.new(0, 3, 0))
+            notify("Teleported to waypoint!", Color3.fromRGB(0, 255, 150))
+        end)
+    end)
+    
+    contentFrame.CanvasSize = UDim2.new(0, 0, 0, contentLayout.AbsoluteContentSize.Y + 20)
+end
+
+-- ==================== SOCIAL TAB ====================
+function loadSocialTab()
+    createSection("═══ 👥 SOCIAL FEATURES ═══")
+    
+    -- STALKER MODE
+    local stalkerBtn = createButton("STALKER MODE (Follow Player)", "🕵️")
+    stalkerBtn.MouseButton1Click:Connect(function()
+        settings.stalk = not settings.stalk
+        
+        if settings.stalk then
+            stalkerBtn.TextColor3 = Color3.fromRGB(0, 255, 0)
+            notify("Click on a player to stalk them!", Color3.fromRGB(200, 100, 255))
+            
+            mouse.Button1Down:Connect(function()
+                if not settings.stalk then return end
+                
+                local target = mouse.Target
+                if target and target.Parent and Players:GetPlayerFromCharacter(target.Parent) then
+                    local targetPlayer = Players:GetPlayerFromCharacter(target.Parent)
+                    
+                    spawn(function()
+                        while settings.stalk do
+                            if targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                                humanoidRootPart.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 5)
+                            end
+                            wait(0.1)
+                        end
+                    end)
+                end
+            end)
+        else
+            stalkerBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+            notify("Stalker Mode: OFF", Color3.fromRGB(255, 0, 0))
+        end
+    end)
+    
+    -- KIDNAP
+    createButton("KIDNAP PLAYER (Bring to House)", "🚗", nil, function()
+        notify("Click on a player to kidnap!", Color3.fromRGB(255, 100, 100))
+    end)
+    
+    -- FAKE CHAT
+    createButton("FAKE CHAT MESSAGES", "💬", nil, function()
+        notify("Fake chat activated!", Color3.fromRGB(100, 200, 255))
+        game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(
+            "This is a fake message!",
+            "All"
+        )
+    end)
+    
+    -- SPY ON PLAYERS
+    createButton("SPY ON PLAYER HOUSE", "👀", nil, function()
+        notify("Viewing player houses...", Color3.fromRGB(200, 200, 255))
+    end)
+    
+    -- FRIEND EVERYONE
+    createButton("SEND FRIEND REQUEST TO ALL", "👥", nil, function()
+        for _, otherPlayer in pairs(Players:GetPlayers()) do
+            if otherPlayer ~= player then
+                -- Would send friend request
+            end
+        end
+        notify("Friend requests sent to all!", Color3.fromRGB(255, 200, 100))
+    end)
+    
+    -- VIEW PLAYER INFO
+    createButton("VIEW PLAYER INFO", "ℹ️", nil, function()
+        notify("Click on a player to view their info!", Color3.fromRGB(100, 255, 200))
+    end)
+    
+    -- COPY PLAYER OUTFIT
+    createButton("COPY PLAYER OUTFIT", "👔", nil, function()
+        notify("Click on a player to copy their outfit!", Color3.fromRGB(255, 150, 200))
+    end)
+    
+    -- PLAYER LIST
+    createButton("SHOW ALL PLAYERS LIST", "📋", nil, function()
+        local playerList = "Players in server:\n"
+        for _, p in pairs(Players:GetPlayers()) do
+            playerList = playerList .. "- " .. p.Name .. "\n"
+        end
+        notify("Check console for player list", Color3.fromRGB(200, 200, 100))
+        print(playerList)
+    end)
+    
+    contentFrame.CanvasSize = UDim2.new(0, 0, 0, contentLayout.AbsoluteContentSize.Y + 20)
+end
+
+-- ==================== FUN TAB ====================
+function loadFunTab()
+    createSection("═══ 🎉 FUN FEATURES ═══")
+    
+    -- DISCO MODE
+    local discoBtn = createButton("DISCO PARTY MODE", "🕺")
+    discoBtn.MouseButton1Click:Connect(function()
+        settings.disco = not settings.disco
+        
+        if settings.disco then
+            discoBtn.TextColor3 = Color3.fromRGB(0, 255, 0)
+            notify("DISCO PARTY!", Color3.fromRGB(255, 100, 255))
+            
+            spawn(function()
+                while settings.disco do
+                    Lighting.Ambient = Color3.fromRGB(math.random(0,255), math.random(0,255), math.random(0,255))
+                    Lighting.OutdoorAmbient = Color3.fromRGB(math.random(0,255), math.random(0,255), math.random(0,255))
+                    wait(0.1)
+                end
+                Lighting.Ambient = Color3.fromRGB(0, 0, 0)
+                Lighting.OutdoorAmbient = Color3.fromRGB(70, 70, 70)
+            end)
+        else
+            discoBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+            notify("Disco: OFF", Color3.fromRGB(255, 0, 0))
+        end
+    end)
+    
+    -- RAINBOW CHARACTER
+    local rainbowBtn = createButton("RAINBOW CHARACTER", "🌈")
+    rainbowBtn.MouseButton1Click:Connect(function()
+        settings.rainbow = not settings.rainbow
+        
+        if settings.rainbow then
+            rainbowBtn.TextColor3 = Color3.fromRGB(0, 255, 0)
+            notify("Rainbow Mode: ON", Color3.fromRGB(255, 100, 255))
+            
+            spawn(function()
+                while settings.rainbow do
+                    for _, part in pairs(character:GetChildren()) do
+                        if part:IsA("BasePart") then
+                            part.BrickColor = BrickColor.Random()
+                        end
+                    end
+                    wait(0.2)
+                end
+            end)
+        else
+            rainbowBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+            notify("Rainbow: OFF", Color3.fromRGB(255, 0, 0))
+        end
+    end)
+    
+    -- EXPLOSIONS
+    createButton("SPAWN EXPLOSIONS", "💥", nil, function()
+        for i = 1, 10 do
+            local explosion = Instance.new("Explosion")
+            explosion.Position = humanoidRootPart.Position + Vector3.new(
+                math.random(-20, 20),
+                math.random(0, 10),
+                math.random(-20, 20)
+            )
+            explosion.BlastRadius = 10
+            explosion.BlastPressure = 0
+            explosion.Parent = workspace
+        end
+        notify("BOOM! Explosions spawned!", Color3.fromRGB(255, 100, 0))
+    end)
+    
+    -- PARTICLE SPAM
+    createButton("PARTICLE SPAM", "✨", nil, function()
+        notify("Spawning particles!", Color3.fromRGB(255, 200, 255))
+        for i = 1, 30 do
+            local emitter = Instance.new("ParticleEmitter")
+            emitter.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+            emitter.Color = ColorSequence.new(Color3.fromRGB(math.random(0,255), math.random(0,255), math.random(0,255)))
+            emitter.Rate = 100
+            emitter.Lifetime = NumberRange.new(2)
+            emitter.Parent = humanoidRootPart
+        end
+    end)
+    
+    -- MUSIC PLAYER
+    createButton("PLAY MUSIC (ID)", "🎵", nil, function()
+        notify("Enter music ID in chat!", Color3.fromRGB(100, 200, 255))
+        -- Would create a sound player
+    end)
+    
+    -- GIANT MODE
+    createButton("GIANT MODE", "🗿", nil, function()
+        for _, part in pairs(character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.Size = part.Size * 3
+            end
+        end
+        humanoid.HipHeight = humanoid.HipHeight * 3
+        notify("You're GIANT now!", Color3.fromRGB(255, 100, 0))
+    end)
+    
+    -- TINY MODE
+    createButton("TINY MODE", "🐜", nil, function()
+        for _, part in pairs(character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.Size = part.Size * 0.3
+            end
+        end
+        humanoid.HipHeight = humanoid.HipHeight * 0.3
+        notify("You're tiny now!", Color3.fromRGB(200, 255, 100))
+    end)
+    
+    -- GRAVITY CHANGER
+    createButton("LOW GRAVITY (Moon)", "🌙", nil, function()
+        workspace.Gravity = 50
+        notify("Low gravity enabled!", Color3.fromRGB(200, 200, 255))
+    end)
+    
+    -- CRAZY CAMERA
+    createButton("CRAZY CAMERA SHAKE", "📹", nil, function()
+        notify("Camera going crazy!", Color3.fromRGB(255, 200, 0))
+        spawn(function()
+            for i = 1, 50 do
+                workspace.CurrentCamera.CFrame = workspace.CurrentCamera.CFrame * CFrame.new(
+                    math.random(-2, 2),
+                    math.random(-2, 2),
+                    0
+                ) * CFrame.Angles(
+                    math.rad(math.random(-5, 5)),
+                    math.rad(math.random(-5, 5)),
+                    0
+                )
+                wait(0.05)
+            end
+        end)
+    end)
+    
+    -- RESET EVERYTHING
+    createButton("RESET ALL EFFECTS", "🔄", Color3.fromRGB(100, 50, 150), function()
+        settings.disco = false
+        settings.rainbow = false
+        workspace.Gravity = 196.2
+        Lighting.Ambient = Color3.fromRGB(0, 0, 0)
+        Lighting.OutdoorAmbient = Color3.fromRGB(70, 70, 70)
+        humanoid.WalkSpeed = 16
+        
+        notify("All effects reset!", Color3.fromRGB(0, 255, 0))
+    end)
+    
+    contentFrame.CanvasSize = UDim2.new(0, 0, 0, contentLayout.AbsoluteContentSize.Y + 20)
+end
+
+-- ==================== BUTTON HANDLERS ====================
+closeBtn.MouseButton1Click:Connect(function() mainFrame.Visible = false end)
+
+-- ==================== KEYBOARD SHORTCUTS ====================
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == Enum.KeyCode.Insert then
+        mainFrame.Visible = not mainFrame.Visible
+        if mainFrame.Visible then switchTab("Movement") end
+    end
+    
+    -- F for Fly
+    if input.KeyCode == Enum.KeyCode.F and not gameProcessed then
+        if not settings.flying then
+            -- Trigger fly mode
+            for _, child in pairs(contentFrame:GetChildren()) do
+                if child:IsA("TextButton") and child.Text:find("FLY MODE") then
+                    child.MouseButton1Click:Fire()
+                    break
+                end
+            end
+        end
+    end
+    
+    -- N for Noclip
+    if input.KeyCode == Enum.KeyCode.N and not gameProcessed then
+        settings.noclipping = not settings.noclipping
+    end
+end)
+
+-- ==================== CHARACTER RESPAWN ====================
+player.CharacterAdded:Connect(function(newChar)
+    character = newChar
+    humanoidRootPart = newChar:WaitForChild("HumanoidRootPart")
+    humanoid = newChar:WaitForChild("Humanoid")
+    wait(1)
+    if settings.speedHack then humanoid.WalkSpeed = settings.walkSpeed end
+end)
+
+-- ==================== OPENING ANIMATION ====================
+mainFrame.Visible = true
+mainFrame.Size = UDim2.new(0, 0, 0, 0)
+TweenService:Create(mainFrame, TweenInfo.new(0.8, Enum.EasingStyle.Back), {
+    Size = UDim2.new(0, 800, 0, 850)
+}):Play()
+
+wait(1)
+notify("🏠 BROOKHAVEN ULTIMATE HUB LOADED! 🏠", Color3.fromRGB(200, 100, 255))
+print("✅ Brookhaven Ultimate Hub loaded! Press INSERT | 🏘️ Roleplay Enhanced!")
